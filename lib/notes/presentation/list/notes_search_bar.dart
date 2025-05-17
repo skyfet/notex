@@ -1,0 +1,57 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class NotesSearchBar extends ConsumerStatefulWidget {
+  const NotesSearchBar({
+    super.key,
+    required this.onQuery,
+    this.hint = 'Поиск заметок',
+  });
+
+  final ValueChanged<String> onQuery;
+  final String hint;
+
+  @override
+  ConsumerState<NotesSearchBar> createState() => _NotesSearchBarState();
+}
+
+class _NotesSearchBarState extends ConsumerState<NotesSearchBar> {
+  late final SearchController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SearchController();
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    widget.onQuery(_controller.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SearchBar(
+      controller: _controller,
+      hintText: widget.hint,
+      onSubmitted: (v) => widget.onQuery(v),
+      leading: const Icon(Icons.search),
+      trailing: [
+        if (_controller.text.isNotEmpty)
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              _controller.clear();
+              widget.onQuery('');
+            },
+          ),
+      ],
+    );
+  }
+}
