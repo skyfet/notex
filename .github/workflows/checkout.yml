@@ -34,6 +34,7 @@ permissions:
 
 jobs:
   checkout:
+    if: github.actor != 'dependabot[bot]'
     name: "🧪 Check code with analysis, format, and tests"
     runs-on: ubuntu-latest
     timeout-minutes: 30

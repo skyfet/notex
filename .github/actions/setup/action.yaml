@@ -38,7 +38,7 @@ runs:
     - name: 👷 Install Dependencies
       shell: bash
       run: |
-        echo /home/runner/.pub-cache/bin >> $GITHUB_PATH
+        echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
         flutter config --no-cli-animations --no-analytics
         flutter pub get
 
