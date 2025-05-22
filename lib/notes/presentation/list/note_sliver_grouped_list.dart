@@ -50,6 +50,36 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) =>
+      SliverList(delegate: SliverChildBuilderDelegate(_builder, childCount: _rows.length));
+
+  Widget? _builder(BuildContext context, int i) {
+    final row = _rows[i];
+
+    switch (row) {
+      case HeaderItem groupHeader:
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(groupHeader.value, style: Theme.of(context).textTheme.titleMedium),
+        );
+
+      case LoaderItem _:
+        WidgetsBinding.instance.addPostFrameCallback((_) => widget.loadMore());
+        return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
+
+      case NoteItem item:
+        return NoteTile(
+          note: item.value,
+          onTap: () => widget.onOpen(item.value),
+          onDelete: () => _handleDelete(item.value.id),
+          onUndo: widget.onUndo,
+          highlightText: widget.searchQuery,
+        );
+    }
+    return null;
+  }
+
   List<RowItem<dynamic>> _buildRows() {
     if (widget.notes.isEmpty) {
       return widget.hasMore ? [const LoaderItem()] : [];
@@ -61,7 +91,7 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
 
       for (final n in widget.notes) {
         final trimmed = n.title.trim().toUpperCase();
-        final letter = trimmed.isEmpty ? '#' : trimmed.characters.first; // emoji safe
+        final letter = trimmed.isEmpty ? '#' : trimmed.characters.first;
         if (letter != currentLetter) {
           currentLetter = letter;
           rows.add(HeaderItem(letter));
@@ -122,35 +152,5 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Не удалось удалить заметку: $e')));
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) =>
-      SliverList(delegate: SliverChildBuilderDelegate(_builder, childCount: _rows.length));
-
-  Widget? _builder(BuildContext context, int i) {
-    final row = _rows[i];
-
-    switch (row) {
-      case HeaderItem h:
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(h.value, style: Theme.of(context).textTheme.titleMedium),
-        );
-
-      case LoaderItem _:
-        WidgetsBinding.instance.addPostFrameCallback((_) => widget.loadMore());
-        return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
-
-      case NoteItem n:
-        return NoteTile(
-          note: n.value,
-          onTap: () => widget.onOpen(n.value),
-          onDelete: () => _handleDelete(n.value.id),
-          onUndo: widget.onUndo,
-          highlightText: widget.searchQuery,
-        );
-    }
-    return null;
   }
 }

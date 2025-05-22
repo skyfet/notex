@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notex/core/presentation/widgets/highlight_text.dart';
 import 'package:notex/notes/domain/entities/note.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -42,14 +43,16 @@ class NoteTile extends StatelessWidget {
     direction: DismissDirection.endToStart,
     onDismissed: (_) {
       onDelete?.call();
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: const Text('Заметка удалена'),
-            action: SnackBarAction(label: 'Отменить', onPressed: onUndo ?? () {}),
-          ),
-        );
+
+      if (onUndo != null)
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: const Text('Заметка удалена'),
+              action: SnackBarAction(label: 'Отменить', onPressed: onUndo!),
+            ),
+          );
     },
     child: child,
   );
@@ -68,22 +71,19 @@ class _TileContent extends StatelessWidget {
     final created = timeago.format(note.createdAt, locale: 'ru');
     final updated = timeago.format(note.updatedAt, locale: 'ru');
 
-    final titleWidget =
-        highlightText.isNotEmpty ? _highlightText(note.title, highlightText, context) : Text(note.title);
-
-    final subtitleText = note.content;
-    final subtitleWidget =
-        subtitleText.isNotEmpty && highlightText.isNotEmpty
-            ? _highlightText(subtitleText, highlightText, context)
-            : Text(subtitleText, maxLines: 2, overflow: TextOverflow.ellipsis);
-
     return ListTile(
       key: ValueKey(note.id),
-      title: titleWidget,
+      title: HighlightText(note.title, highlight: highlightText),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          subtitleWidget,
+          if (note.content.isNotEmpty)
+            HighlightText(
+              note.content,
+              highlight: highlightText,
+              contextClip: true,
+              maxLines: highlightText.isEmpty ? 2 : 4,
+            ),
           if (variant == NoteTileVariant.regular) ...[
             const SizedBox(height: 4),
             Row(
@@ -104,30 +104,5 @@ class _TileContent extends StatelessWidget {
       ),
       onTap: onTap,
     );
-  }
-
-  Widget _highlightText(String source, String query, BuildContext ctx) {
-    final bg = Theme.of(ctx).colorScheme.secondaryContainer;
-
-    final lowerSrc = source.toLowerCase();
-    final lowerQry = query.toLowerCase();
-
-    final spans = <TextSpan>[];
-    var start = 0;
-    while (true) {
-      final idx = lowerSrc.indexOf(lowerQry, start);
-      if (idx < 0) break;
-
-      if (idx > start) {
-        spans.add(TextSpan(text: source.substring(start, idx)));
-      }
-      spans.add(TextSpan(text: source.substring(idx, idx + query.length), style: TextStyle(backgroundColor: bg)));
-      start = idx + query.length;
-    }
-    if (start < source.length) {
-      spans.add(TextSpan(text: source.substring(start)));
-    }
-
-    return Text.rich(TextSpan(children: spans));
   }
 }
