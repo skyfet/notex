@@ -50,9 +50,6 @@ jobs:
       - name: 🚂 Setup Flutter and dependencies
         uses: ./.github/actions/setup
 
-      - name: 🛠 Проверка версии Flutter
-        run: flutter --version
-
       - name: 🚦 Check code format
         id: check-format
         timeout-minutes: 1
@@ -65,9 +62,9 @@ jobs:
         timeout-minutes: 1
         run: flutter analyze --fatal-infos --fatal-warnings lib/ test/
 
-      - name: 🧪 Unit & Widget tests
+      - name: 🧪 Unit & Integration & Widget tests
         timeout-minutes: 20
-        run: flutter test --coverage --concurrency=43
+        run: flutter test test/unit test/integration test/widget --coverage --concurrency=43
 
       - name: 📥 Upload test report
         uses: actions/upload-artifact@v4
