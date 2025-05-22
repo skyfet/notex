@@ -25,4 +25,8 @@ class NotesListState with NotesListStateMappable {
   final bool isLoadingMore;
   final bool hasMore;
   final String? error;
+
+  bool get isSearching => query.isNotEmpty;
+
+  bool get hasAnyNotes => notes.isNotEmpty;
 }

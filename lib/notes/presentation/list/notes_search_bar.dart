@@ -13,12 +13,15 @@ class NotesSearchBar extends ConsumerStatefulWidget {
 
 class _NotesSearchBarState extends ConsumerState<NotesSearchBar> {
   late final SearchController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = SearchController();
     _controller.addListener(_onTextChanged);
+
+    _focusNode = FocusNode();
   }
 
   @override
@@ -33,6 +36,8 @@ class _NotesSearchBarState extends ConsumerState<NotesSearchBar> {
 
   @override
   Widget build(BuildContext context) => SearchBar(
+    onTapOutside: (event) => _focusNode.unfocus(),
+    focusNode: _focusNode,
     controller: _controller,
     hintText: widget.hint,
     onSubmitted: (v) => widget.onQuery(v),

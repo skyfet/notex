@@ -28,15 +28,12 @@ class NotesListPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Заметки'),
         bottom:
-            state.query.isEmpty && state.notes.isEmpty
-                ? null
-                : PreferredSize(
-                  preferredSize: const Size.fromHeight(64),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: NotesSearchBar(onQuery: vm.setQuery),
-                  ),
-                ),
+            state.isSearching || state.hasAnyNotes
+                ? PreferredSize(
+                  preferredSize: const Size.fromHeight(80),
+                  child: Padding(padding: const EdgeInsets.all(16), child: NotesSearchBar(onQuery: vm.setQuery)),
+                )
+                : null,
         actions: [
           if (state.isLoading) const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
           OrderingButton(order: state.order, onChange: vm.setOrder),
