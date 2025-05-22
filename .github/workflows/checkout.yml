@@ -66,10 +66,3 @@ jobs:
       - name: 🧪 Unit & Integration & Widget tests
         timeout-minutes: 20
         run: flutter test test/unit test/integration test/widget --coverage --concurrency=43 
-
-      - name: 📥 Upload test report
-        uses: actions/upload-artifact@v4
-        if: (success() || failure()) && ${{ github.actor != 'dependabot[bot]' }}
-        with:
-          name: test-results
-          path: reports/tests.json
