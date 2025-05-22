@@ -19,10 +19,7 @@ class NotesListPage extends ConsumerWidget {
 
     Future<void> open([Note? note]) async {
       final changed =
-          await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (_) => NoteFormPage(note: note)),
-          ) ??
-          false;
+          await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => NoteFormPage(note: note))) ?? false;
 
       if (changed) await vm.refresh();
     }
@@ -41,11 +38,7 @@ class NotesListPage extends ConsumerWidget {
                   ),
                 ),
         actions: [
-          if (state.isLoading)
-            const SizedBox.square(
-              dimension: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+          if (state.isLoading) const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
           OrderingButton(order: state.order, onChange: vm.setOrder),
           IconButton(
             icon: const Icon(Icons.settings),
@@ -57,18 +50,10 @@ class NotesListPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: switch ((
-        state.isInitialLoading,
-        state.error,
-        state.notes.isEmpty,
-      )) {
+      body: switch ((state.isInitialLoading, state.error, state.notes.isEmpty)) {
         (true, _, _) => const Center(child: CircularProgressIndicator()),
         (_, String e, _) => Center(child: Text('Ошибка: $e')),
-        (_, _, true) => Center(
-          child: Text(
-            state.query.isEmpty ? 'Нет заметок' : 'Ничего не найдено',
-          ),
-        ),
+        (_, _, true) => Center(child: Text(state.query.isEmpty ? 'Нет заметок' : 'Ничего не найдено')),
         _ => CustomScrollView(
           slivers: [
             NoteSliverGroupedList(
@@ -84,10 +69,7 @@ class NotesListPage extends ConsumerWidget {
           ],
         ),
       },
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => open(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: open, child: const Icon(Icons.add)),
     );
   }
 }
@@ -101,41 +83,25 @@ Future<void> _generateFakes(BuildContext context, NotesListViewModel vm) async {
         (ctx) => AlertDialog(
           title: const Text('Генерация тестовых заметок'),
           content: TextField(
-            decoration: const InputDecoration(
-              labelText: 'Введите количество (<1000)',
-            ),
+            decoration: const InputDecoration(labelText: 'Введите количество (<1000)'),
             onChanged: (v) => count = int.tryParse(v),
             maxLength: 3,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             keyboardType: TextInputType.number,
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Отмена'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Создать'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Отмена')),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Создать')),
           ],
         ),
   );
 
-  if ((ok ?? false) &&
-      count != null &&
-      count! > 0 &&
-      count! < 1000 &&
-      context.mounted) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Генерирую заметки…')));
+  if ((ok ?? false) && count != null && count! > 0 && count! < 1000 && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Генерирую заметки…')));
     await vm.generateFake(count!);
     if (context.mounted) {
       ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('$count заметок создано')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$count заметок создано')));
     }
   }
 }

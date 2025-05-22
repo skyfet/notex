@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:notex/notes/presentation/note_form_page.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('✓ button disabled until title typed', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: NoteFormPage())),
-    );
+    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: NoteFormPage())));
 
     final saveBtn = find.widgetWithIcon(IconButton, Icons.check);
     expect(

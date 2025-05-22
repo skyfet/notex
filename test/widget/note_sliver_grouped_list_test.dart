@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notex/core/configured_app.dart';
 import 'package:notex/notes/app/types/note_order.dart';
 import 'package:notex/notes/presentation/list/note_sliver_grouped_list.dart';
-import 'package:notex/notex_app.dart';
 
 import '../mocks.dart';
 
@@ -10,11 +10,7 @@ void main() {
   setUpAll(initTestDefault);
 
   testWidgets('группирует по первой букве (включая emoji)', (tester) async {
-    final notes = [
-      fakeNote(id: 1, title: '🔥 Fire'),
-      fakeNote(id: 2, title: 'Apple'),
-      fakeNote(id: 3, title: 'Альфа'),
-    ];
+    final notes = [fakeNote(id: 1, title: '🔥 Fire'), fakeNote(id: 2, title: 'Apple'), fakeNote(id: 3, title: 'Альфа')];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -37,11 +33,7 @@ void main() {
     );
 
     final headers =
-        tester
-            .widgetList<Text>(find.byType(Text))
-            .map((e) => e.data)
-            .where((s) => s != null && s.isNotEmpty)
-            .toList();
+        tester.widgetList<Text>(find.byType(Text)).map((e) => e.data).where((s) => s != null && s.isNotEmpty).toList();
 
     expect(headers, containsAllInOrder(['🔥', 'A', 'А']));
   });

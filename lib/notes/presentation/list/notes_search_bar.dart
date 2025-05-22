@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotesSearchBar extends ConsumerStatefulWidget {
-  const NotesSearchBar({
-    super.key,
-    required this.onQuery,
-    this.hint = 'Поиск заметок',
-  });
+  const NotesSearchBar({required this.onQuery, super.key, this.hint = 'Поиск заметок'});
 
   final ValueChanged<String> onQuery;
   final String hint;
@@ -36,22 +32,20 @@ class _NotesSearchBarState extends ConsumerState<NotesSearchBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SearchBar(
-      controller: _controller,
-      hintText: widget.hint,
-      onSubmitted: (v) => widget.onQuery(v),
-      leading: const Icon(Icons.search),
-      trailing: [
-        if (_controller.text.isNotEmpty)
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _controller.clear();
-              widget.onQuery('');
-            },
-          ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => SearchBar(
+    controller: _controller,
+    hintText: widget.hint,
+    onSubmitted: (v) => widget.onQuery(v),
+    leading: const Icon(Icons.search),
+    trailing: [
+      if (_controller.text.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            _controller.clear();
+            widget.onQuery('');
+          },
+        ),
+    ],
+  );
 }

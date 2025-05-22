@@ -1,11 +1,11 @@
-import 'package:notex/core/exceptions/validation_exception.dart';
-import 'content_validation.dart';
-import 'title_validation.dart';
+import 'package:notex/core/exceptions/invalidation.dart';
+import 'package:notex/notes/app/validations/content_validation.dart';
+import 'package:notex/notes/app/validations/title_validation.dart';
 
 class NoteValidator {
-  static void validate({required String title, required String content}) =>
+  void validate({required String title, required String content}) =>
       <Invalidation>[]
-          .extendWith(TitleValidation.validate(title))
-          .extendWith(ContentValidation.validate(content))
+          .extendWith(TitleValidation().validate(title))
+          .extendWith(ContentValidation().validate(content))
           .throwIfInvalid();
 }

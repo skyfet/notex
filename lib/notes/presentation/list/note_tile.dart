@@ -6,9 +6,9 @@ enum NoteTileVariant { regular, compact }
 
 class NoteTile extends StatelessWidget {
   const NoteTile({
-    super.key,
     required this.note,
     required this.onTap,
+    super.key,
     this.onDelete,
     this.onUndo,
     this.variant = NoteTileVariant.regular,
@@ -22,57 +22,41 @@ class NoteTile extends StatelessWidget {
   final NoteTileVariant variant;
   final String highlightText;
 
-  bool get _isDismissible =>
-      onDelete != null && variant == NoteTileVariant.regular;
+  bool get _isDismissible => onDelete != null && variant == NoteTileVariant.regular;
 
   @override
   Widget build(BuildContext context) {
-    final content = _TileContent(
-      note: note,
-      variant: variant,
-      highlightText: highlightText,
-      onTap: onTap,
-    );
+    final content = _TileContent(note: note, variant: variant, highlightText: highlightText, onTap: onTap);
 
     return _isDismissible ? _buildDismissible(context, content) : content;
   }
 
-  Widget _buildDismissible(BuildContext context, Widget child) {
-    return Dismissible(
-      key: ValueKey(note.id),
-      background: Container(
-        color: Theme.of(context).colorScheme.error,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) {
-        onDelete?.call();
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(
-              content: const Text('Заметка удалена'),
-              action: SnackBarAction(
-                label: 'Отменить',
-                onPressed: onUndo ?? () {},
-              ),
-            ),
-          );
-      },
-      child: child,
-    );
-  }
+  Widget _buildDismissible(BuildContext context, Widget child) => Dismissible(
+    key: ValueKey(note.id),
+    background: Container(
+      color: Theme.of(context).colorScheme.error,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      child: const Icon(Icons.delete, color: Colors.white),
+    ),
+    direction: DismissDirection.endToStart,
+    onDismissed: (_) {
+      onDelete?.call();
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: const Text('Заметка удалена'),
+            action: SnackBarAction(label: 'Отменить', onPressed: onUndo ?? () {}),
+          ),
+        );
+    },
+    child: child,
+  );
 }
 
 class _TileContent extends StatelessWidget {
-  const _TileContent({
-    required this.note,
-    required this.variant,
-    required this.onTap,
-    required this.highlightText,
-  });
+  const _TileContent({required this.note, required this.variant, required this.onTap, required this.highlightText});
   final VoidCallback onTap;
 
   final Note note;
@@ -85,9 +69,7 @@ class _TileContent extends StatelessWidget {
     final updated = timeago.format(note.updatedAt, locale: 'ru');
 
     final titleWidget =
-        highlightText.isNotEmpty
-            ? _highlightText(note.title, highlightText, context)
-            : Text(note.title);
+        highlightText.isNotEmpty ? _highlightText(note.title, highlightText, context) : Text(note.title);
 
     final subtitleText = note.content;
     final subtitleWidget =
@@ -131,7 +113,7 @@ class _TileContent extends StatelessWidget {
     final lowerQry = query.toLowerCase();
 
     final spans = <TextSpan>[];
-    int start = 0;
+    var start = 0;
     while (true) {
       final idx = lowerSrc.indexOf(lowerQry, start);
       if (idx < 0) break;
@@ -139,12 +121,7 @@ class _TileContent extends StatelessWidget {
       if (idx > start) {
         spans.add(TextSpan(text: source.substring(start, idx)));
       }
-      spans.add(
-        TextSpan(
-          text: source.substring(idx, idx + query.length),
-          style: TextStyle(backgroundColor: bg),
-        ),
-      );
+      spans.add(TextSpan(text: source.substring(idx, idx + query.length), style: TextStyle(backgroundColor: bg)));
       start = idx + query.length;
     }
     if (start < source.length) {

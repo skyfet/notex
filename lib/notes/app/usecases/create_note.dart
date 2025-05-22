@@ -3,12 +3,11 @@ import 'package:notex/notes/domain/entities/note.dart';
 import 'package:notex/notes/domain/repositories/note_repository.dart';
 
 class CreateNote {
+  CreateNote(this.repository);
   final NoteRepository repository;
 
-  CreateNote(this.repository);
-
   Future<void> call(Note note) async {
-    NoteValidator.validate(title: note.title, content: note.content);
+    NoteValidator().validate(title: note.title, content: note.content);
 
     await repository.createNote(note);
   }

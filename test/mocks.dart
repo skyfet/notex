@@ -14,18 +14,13 @@ class MockDeleteNote extends Mock implements DeleteNote {}
 
 class MockCreateNote extends Mock implements CreateNote {}
 
-Note fakeNote({
-  int id = 1,
-  String? title,
-  String? content,
-  DateTime? created,
-  DateTime? updated,
-}) {
+Note fakeNote({int id = 1, String? title, String? content, DateTime? created, DateTime? updated}) {
   final now = DateTime.now();
+  final faker = Faker(seed: id + 100);
   return Note(
     id: id,
-    title: title ?? Faker().lorem.words(4).join(' '),
-    content: content ?? Faker().lorem.sentences(3).join(' '),
+    title: title ?? faker.lorem.words(3).join(' '),
+    content: content ?? faker.lorem.sentences(1).join(' '),
     createdAt: created ?? now,
     updatedAt: updated ?? now,
   );

@@ -41,14 +41,7 @@ void main() {
     final vm = createViewModel();
     await vm.loadList(); // один вызов
 
-    verify(
-      () => getPaged(
-        offset: 0,
-        limit: 100,
-        query: '',
-        order: any(named: 'order'),
-      ),
-    ).called(1);
+    verify(() => getPaged(offset: 0, limit: 100, query: '', order: any(named: 'order'))).called(1);
 
     expect(vm.state.isLoading, isFalse);
     expect(vm.state.notes, hasLength(1));
@@ -56,49 +49,25 @@ void main() {
 
   test('setQuery дебаунсит вызовы', () {
     FakeAsync().run((time) {
-      final vm = createViewModel()..loadList();
-
-      vm.setQuery('a');
-      vm.setQuery('ab');
+      createViewModel()
+        ..loadList()
+        ..setQuery('a')
+        ..setQuery('ab');
 
       time.elapse(const Duration(milliseconds: 299));
-      verifyNever(
-        () => getPaged(
-          query: 'ab',
-          offset: 0,
-          limit: 100,
-          order: any(named: 'order'),
-        ),
-      );
+      verifyNever(() => getPaged(query: 'ab', offset: 0, limit: 100, order: any(named: 'order')));
 
       time.elapse(const Duration(milliseconds: 2)); // после 301 мс
-      verify(
-        () => getPaged(
-          query: 'ab',
-          offset: 0,
-          limit: 100,
-          order: any(named: 'order'),
-        ),
-      ).called(1);
+      verify(() => getPaged(query: 'ab', offset: 0, limit: 100, order: any(named: 'order'))).called(1);
     });
   });
 
   test('loadMore добавляет элементы и корректно выставляет hasMore', () async {
     when(
-      () => getPaged(
-        offset: 0,
-        limit: 100,
-        query: '',
-        order: any(named: 'order'),
-      ),
+      () => getPaged(offset: 0, limit: 100, query: '', order: any(named: 'order')),
     ).thenAnswer((_) async => List.generate(100, (i) => fakeNote(id: i)));
     when(
-      () => getPaged(
-        offset: 100,
-        limit: 100,
-        query: '',
-        order: any(named: 'order'),
-      ),
+      () => getPaged(offset: 100, limit: 100, query: '', order: any(named: 'order')),
     ).thenAnswer((_) async => List.generate(20, (i) => fakeNote(id: 100 + i)));
 
     final vm = createViewModel();
@@ -111,14 +80,7 @@ void main() {
 
   test('restore создаёт новую заметку без старого id', () async {
     final note = fakeNote(id: 43);
-    when(
-      () => getPaged(
-        offset: 0,
-        limit: 100,
-        query: '',
-        order: any(named: 'order'),
-      ),
-    ).thenAnswer((_) async => [note]);
+    when(() => getPaged(offset: 0, limit: 100, query: '', order: any(named: 'order'))).thenAnswer((_) async => [note]);
 
     when(() => del(43)).thenAnswer((_) async {});
     when(() => create(any<Note>())).thenAnswer((_) async {});
@@ -129,8 +91,7 @@ void main() {
     await vm.delete(43);
     await vm.restore();
 
-    final created =
-        verify(() => create(captureAny<Note>())).captured.single as Note;
+    final created = verify(() => create(captureAny<Note>())).captured.single as Note;
     expect(created.id, anyOf(isNull, equals(0)));
   });
 }

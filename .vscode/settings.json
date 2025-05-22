@@ -7,5 +7,10 @@
         "timeago",
         "usecase",
         "viewmodel"
-    ]
+    ],
+    "[dart]": {
+        "editor.rulers": [
+            120
+        ],
+    },
 }

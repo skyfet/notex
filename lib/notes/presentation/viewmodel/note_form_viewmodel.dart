@@ -7,32 +7,23 @@ import 'package:notex/notes/domain/entities/note.dart';
 import 'package:notex/notes/presentation/viewmodel/state/note_form_state.dart';
 
 /// Provider‑family: создаёт VM с уже заполненным начальными данными
-final noteFormViewModelProvider = StateNotifierProvider.autoDispose
-    .family<NoteFormViewModel, NoteFormState, Note?>(
-      (ref, note) => NoteFormViewModel(
-        createNote: ref.read(createNoteProvider),
-        updateNote: ref.read(updateNoteProvider),
-        initialNote: note,
-      ),
-    );
+final noteFormViewModelProvider = StateNotifierProvider.autoDispose.family<NoteFormViewModel, NoteFormState, Note?>(
+  (ref, note) => NoteFormViewModel(
+    createNote: ref.read(createNoteProvider),
+    updateNote: ref.read(updateNoteProvider),
+    initialNote: note,
+  ),
+);
 
 class NoteFormViewModel extends StateNotifier<NoteFormState> {
+  NoteFormViewModel({required this.createNote, required this.updateNote, Note? initialNote})
+    : super(
+        initialNote == null
+            ? const NoteFormState()
+            : NoteFormState(existing: initialNote, title: initialNote.title, content: initialNote.content),
+      );
   final CreateNote createNote;
   final UpdateNote updateNote;
-
-  NoteFormViewModel({
-    required this.createNote,
-    required this.updateNote,
-    Note? initialNote,
-  }) : super(
-         initialNote == null
-             ? const NoteFormState()
-             : NoteFormState(
-               existing: initialNote,
-               title: initialNote.title,
-               content: initialNote.content,
-             ),
-       );
 
   void setTitle(String v) => state = state.copyWith(title: v, error: null);
   void setContent(String v) => state = state.copyWith(content: v, error: null);
@@ -42,13 +33,9 @@ class NoteFormViewModel extends StateNotifier<NoteFormState> {
   Future<void> submit() async {
     try {
       if (state.existing == null) {
-        await createNote(
-          Note.create(title: state.title, content: state.content),
-        );
+        await createNote(Note.create(title: state.title, content: state.content));
       } else {
-        await updateNote(
-          state.existing!.copyWith(title: state.title, content: state.content),
-        );
+        await updateNote(state.existing!.copyWith(title: state.title, content: state.content));
       }
       state = state.copyWith(error: null);
     } on ValidationException catch (e) {

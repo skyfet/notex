@@ -7,6 +7,16 @@ part 'note_list_state.mapper.dart';
 
 @MappableClass()
 class NotesListState with NotesListStateMappable {
+  const NotesListState({
+    this.notes = const [],
+    this.query = '',
+    this.order = const NoteOrder(field: NoteSortField.updatedAt, direction: SortDirection.desc),
+    this.isInitialLoading = true,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.hasMore = true,
+    this.error,
+  });
   final List<Note> notes;
   final String query;
   final NoteOrder order;
@@ -15,18 +25,4 @@ class NotesListState with NotesListStateMappable {
   final bool isLoadingMore;
   final bool hasMore;
   final String? error;
-
-  const NotesListState({
-    this.notes = const [],
-    this.query = '',
-    this.order = const NoteOrder(
-      field: NoteSortField.updatedAt,
-      direction: SortDirection.desc,
-    ),
-    this.isInitialLoading = true,
-    this.isLoading = false,
-    this.isLoadingMore = false,
-    this.hasMore = true,
-    this.error,
-  });
 }

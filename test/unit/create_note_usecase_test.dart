@@ -6,6 +6,7 @@ import 'package:notex/notes/domain/repositories/note_repository.dart';
 
 class _MockRepo extends Mock implements NoteRepository {}
 
+// ignore: avoid_implementing_value_types
 class _FakeNote extends Fake implements Note {}
 
 void main() {

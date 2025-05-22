@@ -8,6 +8,18 @@ import 'package:notex/notes/domain/entities/note.dart';
 import 'package:notex/notes/presentation/list/note_tile.dart';
 
 class NoteSliverGroupedList extends StatefulWidget {
+  const NoteSliverGroupedList({
+    required this.notes,
+    required this.order,
+    required this.hasMore,
+    required this.loadMore,
+    required this.onOpen,
+    required this.onDelete,
+    required this.onUndo,
+    this.searchQuery = '',
+    super.key,
+  });
+
   final List<Note> notes;
   final NoteOrder order;
   final bool hasMore;
@@ -17,24 +29,12 @@ class NoteSliverGroupedList extends StatefulWidget {
   final VoidCallback onUndo;
   final String searchQuery;
 
-  const NoteSliverGroupedList({
-    super.key,
-    required this.notes,
-    required this.order,
-    required this.hasMore,
-    required this.loadMore,
-    required this.onOpen,
-    required this.onDelete,
-    required this.onUndo,
-    this.searchQuery = '',
-  });
-
   @override
   State<NoteSliverGroupedList> createState() => _NoteSliverGroupedListState();
 }
 
 class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
-  late List<RowItem> _rows;
+  late List<RowItem<dynamic>> _rows;
 
   @override
   void initState() {
@@ -50,19 +50,18 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
     }
   }
 
-  List<RowItem> _buildRows() {
+  List<RowItem<dynamic>> _buildRows() {
     if (widget.notes.isEmpty) {
       return widget.hasMore ? [const LoaderItem()] : [];
     }
 
     if (widget.order.field == NoteSortField.title) {
       String? currentLetter;
-      final rows = <RowItem>[];
+      final rows = <RowItem<dynamic>>[];
 
       for (final n in widget.notes) {
         final trimmed = n.title.trim().toUpperCase();
-        final letter =
-            trimmed.isEmpty ? '#' : trimmed.characters.first; // emoji safe
+        final letter = trimmed.isEmpty ? '#' : trimmed.characters.first; // emoji safe
         if (letter != currentLetter) {
           currentLetter = letter;
           rows.add(HeaderItem(letter));
@@ -74,13 +73,10 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
       return rows;
     }
 
-    DateTime Function(Note n) pick =
-        widget.order.field == NoteSortField.createdAt
-            ? (n) => n.createdAt
-            : (n) => n.updatedAt;
+    DateTime pick(Note n) => widget.order.field == NoteSortField.createdAt ? n.createdAt : n.updatedAt;
 
     DateTime? currentDay;
-    final rows = <RowItem>[];
+    final rows = <RowItem<dynamic>>[];
 
     for (final n in widget.notes) {
       final d = pick(n);
@@ -112,30 +108,25 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
   }
 
   Future<void> _handleDelete(int id) async {
-    final backup = List<RowItem>.from(_rows);
+    final backup = List<RowItem<dynamic>>.from(_rows);
 
     setState(() {
-      _rows.removeWhere((row) => row is NoteItem && row.note.id == id);
+      _rows.removeWhere((row) => row is NoteItem && row.value.id == id);
     });
 
     try {
       await widget.onDelete(id);
-    } catch (e) {
+    } on Object catch (e) {
       if (mounted) {
         setState(() => _rows = backup);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Не удалось удалить заметку: $e')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Не удалось удалить заметку: $e')));
       }
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(_builder, childCount: _rows.length),
-    );
-  }
+  Widget build(BuildContext context) =>
+      SliverList(delegate: SliverChildBuilderDelegate(_builder, childCount: _rows.length));
 
   Widget? _builder(BuildContext context, int i) {
     final row = _rows[i];
@@ -144,21 +135,18 @@ class _NoteSliverGroupedListState extends State<NoteSliverGroupedList> {
       case HeaderItem h:
         return Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(h.text, style: Theme.of(context).textTheme.titleMedium),
+          child: Text(h.value, style: Theme.of(context).textTheme.titleMedium),
         );
 
       case LoaderItem _:
         WidgetsBinding.instance.addPostFrameCallback((_) => widget.loadMore());
-        return const Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(child: CircularProgressIndicator()),
-        );
+        return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
 
       case NoteItem n:
         return NoteTile(
-          note: n.note,
-          onTap: () => widget.onOpen(n.note),
-          onDelete: () => _handleDelete(n.note.id),
+          note: n.value,
+          onTap: () => widget.onOpen(n.value),
+          onDelete: () => _handleDelete(n.value.id),
           onUndo: widget.onUndo,
           highlightText: widget.searchQuery,
         );

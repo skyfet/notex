@@ -11,20 +11,11 @@ part 'notes_dao.g.dart';
 class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
   NotesDao(super.db);
 
-  Future<List<Note>> getNotesPaged({
-    required int offset,
-    required int limit,
-    String? query,
-    required NoteOrder order,
-  }) {
+  Future<List<Note>> getNotesPaged({required int offset, required int limit, required NoteOrder order, String? query}) {
     final q = select(notes)..limit(limit, offset: offset);
 
     if (query != null && query.isNotEmpty) {
-      q.where(
-        (tbl) =>
-            tbl.title.likeExp(Variable('%$query%')) |
-            tbl.content.likeExp(Variable('%$query%')),
-      );
+      q.where((tbl) => tbl.title.likeExp(Variable('%$query%')) | tbl.content.likeExp(Variable('%$query%')));
     }
 
     q.orderBy([
@@ -34,31 +25,19 @@ class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
           NoteSortField.updatedAt => tbl.updatedAt,
           NoteSortField.createdAt => tbl.createdAt,
         },
-        mode:
-            order.direction == SortDirection.desc
-                ? OrderingMode.desc
-                : OrderingMode.asc,
+        mode: order.direction == SortDirection.desc ? OrderingMode.desc : OrderingMode.asc,
       ),
     ]);
 
     return q.get();
   }
 
-  Future<Note> insertNote(Note note) => into(notes).insertReturning(
-    NotesCompanion.insert(title: note.title, content: note.content),
+  Future<Note> insertNote(Note note) =>
+      into(notes).insertReturning(NotesCompanion.insert(title: note.title, content: note.content));
+
+  Future<int> updateNote(Note note) => (update(notes)..where((tbl) => tbl.id.equals(note.id))).write(
+    NotesCompanion(title: Value(note.title), content: Value(note.content), updatedAt: Value(DateTime.timestamp())),
   );
 
-  Future<int> updateNote(Note note) {
-    return (update(notes)..where((tbl) => tbl.id.equals(note.id))).write(
-      NotesCompanion(
-        title: Value(note.title),
-        content: Value(note.content),
-        updatedAt: Value(DateTime.timestamp()),
-      ),
-    );
-  }
-
-  Future<int> deleteNote(int id) {
-    return (delete(notes)..where((tbl) => tbl.id.equals(id))).go();
-  }
+  Future<int> deleteNote(int id) => (delete(notes)..where((tbl) => tbl.id.equals(id))).go();
 }

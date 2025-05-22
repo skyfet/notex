@@ -1,12 +1,13 @@
 abstract class RowItem<T> {
-  const RowItem();
+  const RowItem(this.value);
+
+  final T value;
 }
 
 class HeaderItem extends RowItem<String> {
-  final String text;
-  HeaderItem(this.text);
+  const HeaderItem(super.value);
 }
 
-class LoaderItem extends RowItem {
-  const LoaderItem();
+class LoaderItem extends RowItem<void> {
+  const LoaderItem() : super(null);
 }

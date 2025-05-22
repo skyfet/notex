@@ -12,16 +12,25 @@ import 'package:notex/notes/app/usecases/get_notes_paged.dart';
 import 'package:notex/notes/domain/entities/note.dart';
 import 'package:notex/notes/presentation/viewmodel/state/note_list_state.dart';
 
-final notesListViewModelProvider =
-    StateNotifierProvider<NotesListViewModel, NotesListState>(
-      (ref) => NotesListViewModel(
-        getNotesPaged: ref.read(getNotesPagedProvider),
-        deleteNote: ref.read(deleteNoteProvider),
-        createNote: ref.read(createNoteProvider),
-      ),
-    );
+final notesListViewModelProvider = StateNotifierProvider<NotesListViewModel, NotesListState>(
+  (ref) => NotesListViewModel(
+    getNotesPaged: ref.read(getNotesPagedProvider),
+    deleteNote: ref.read(deleteNoteProvider),
+    createNote: ref.read(createNoteProvider),
+  ),
+);
 
 class NotesListViewModel extends StateNotifier<NotesListState> {
+  NotesListViewModel({
+    required this.getNotesPaged,
+    required this.deleteNote,
+    required this.createNote,
+    bool autoload = true,
+  }) : super(const NotesListState()) {
+    if (autoload) {
+      loadList(initial: true);
+    }
+  }
   final GetNotesPaged getNotesPaged;
   final DeleteNote deleteNote;
   final CreateNote createNote;
@@ -33,17 +42,6 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
 
   Timer? _debounce;
   Note? _lastDeleted;
-
-  NotesListViewModel({
-    required this.getNotesPaged,
-    required this.deleteNote,
-    required this.createNote,
-    bool autoload = true,
-  }) : super(const NotesListState()) {
-    if (autoload) {
-      loadList(true);
-    }
-  }
 
   Future<void> generateFake(int count) async {
     if (!kDebugMode) return;
@@ -61,7 +59,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
     await refresh();
   }
 
-  Future<void> loadList([bool initial = false]) async {
+  Future<void> loadList({bool initial = false}) async {
     final myId = ++_requestId;
 
     state = state.copyWith(
@@ -73,12 +71,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
     );
 
     try {
-      final notes = await getNotesPaged(
-        offset: 0,
-        limit: _pageSize,
-        query: state.query,
-        order: state.order,
-      );
+      final notes = await getNotesPaged(offset: 0, limit: _pageSize, query: state.query, order: state.order);
       if (myId != _requestId) return; // результат устарел, не обновляем стейт
       // if (kDebugMode) await Future.delayed(const Duration(milliseconds: 400));
 
@@ -88,13 +81,9 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
         isInitialLoading: false,
         hasMore: notes.length >= _pageSize,
       );
-    } catch (e) {
+    } on Object catch (e) {
       if (myId != _requestId) return;
-      state = state.copyWith(
-        isLoading: false,
-        isInitialLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, isInitialLoading: false, error: e.toString());
     }
   }
 
@@ -114,12 +103,8 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
       // if (kDebugMode) await Future.delayed(const Duration(milliseconds: 400));
 
       final notes = [...state.notes, ...next];
-      state = state.copyWith(
-        notes: notes,
-        isLoadingMore: false,
-        hasMore: next.length >= _pageSize,
-      );
-    } catch (e) {
+      state = state.copyWith(notes: notes, isLoadingMore: false, hasMore: next.length >= _pageSize);
+    } on Object catch (e) {
       state = state.copyWith(isLoadingMore: false, error: e.toString());
     }
   }
@@ -142,7 +127,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
     _lastDeleted = note;
 
     await deleteNote(id);
-    loadList();
+    await loadList();
   }
 
   Future<void> restore() async {
@@ -152,7 +137,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
 
     // создаём новую заметку с теми же данными
     await createNote(Note.create(title: note.title, content: note.content));
-    loadList();
+    await loadList();
   }
 
   Future<void> refresh() => loadList();

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notex/di/app_providers.dart';
-import 'package:notex/notes/app/usecases/get_notes_paged.dart';
 import 'package:notex/notes/app/usecases/create_note.dart';
-import 'package:notex/notes/app/usecases/update_note.dart';
 import 'package:notex/notes/app/usecases/delete_note.dart';
+import 'package:notex/notes/app/usecases/get_notes_paged.dart';
+import 'package:notex/notes/app/usecases/update_note.dart';
 import 'package:notex/notes/data/datasources/notes_dao.dart';
 import 'package:notex/notes/data/repository/note_repository_impl.dart';
 import 'package:notex/notes/domain/repositories/note_repository.dart';
@@ -33,6 +33,4 @@ final noteRepositoryProvider = Provider<NoteRepository>((ref) {
 });
 
 // DAO
-final notesDaoProvider = Provider<NotesDao>((ref) {
-  return ref.watch(appDatabaseProvider).notesDao;
-});
+final notesDaoProvider = Provider<NotesDao>((ref) => ref.watch(appDatabaseProvider).notesDao);

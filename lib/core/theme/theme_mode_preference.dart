@@ -13,9 +13,6 @@ class ThemeModePreference {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_key);
 
-    return ThemeMode.values.firstWhere(
-      (m) => m.name == value,
-      orElse: () => ThemeMode.system,
-    );
+    return ThemeMode.values.firstWhere((m) => m.name == value, orElse: () => ThemeMode.system);
   }
 }

@@ -1,10 +1,10 @@
-import 'package:notex/core/exceptions/validation_exception.dart';
+import 'package:notex/core/exceptions/invalidation.dart';
 
 const titleMinLength = 3;
 const titleMaxLength = 255;
 
 class TitleValidation {
-  static List<Invalidation> validate(String title) {
+  List<Invalidation> validate(String title) {
     final errors = <Invalidation>[];
     final trimmed = title.trim();
 
@@ -13,13 +13,9 @@ class TitleValidation {
     }
 
     if (trimmed.length < titleMinLength) {
-      errors.add(
-        const Invalidation('title', 'Минимум $titleMinLength символа'),
-      );
+      errors.add(const Invalidation('title', 'Минимум $titleMinLength символа'));
     } else if (trimmed.length > titleMaxLength) {
-      errors.add(
-        const Invalidation('title', 'Максимум $titleMaxLength символов'),
-      );
+      errors.add(const Invalidation('title', 'Максимум $titleMaxLength символов'));
     }
 
     return errors;
