@@ -1,17 +1,18 @@
 {
-    "cSpell.words": [
-        "goldens",
-        "mocktail",
-        "notex",
-        "Notex",
-        "Schyler",
-        "timeago",
-        "usecase",
-        "viewmodel"
-    ],
-    "[dart]": {
-        "editor.rulers": [
-            120
-        ],
-    },
+  "cSpell.words": [
+    "goldens",
+    "mocktail",
+    "notex",
+    "Notex",
+    "Schyler",
+    "timeago",
+    "usecase",
+    "viewmodel"
+  ],
+  "[dart]": {
+    "editor.rulers": [
+      120
+    ]
+  },
+  "dart.flutterSdkPath": ".fvm/versions/3.29.3"
 }
