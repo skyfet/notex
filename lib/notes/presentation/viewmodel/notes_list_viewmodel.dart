@@ -11,12 +11,15 @@ import 'package:notex/notes/app/usecases/delete_note.dart';
 import 'package:notex/notes/app/usecases/get_notes_paged.dart';
 import 'package:notex/notes/domain/entities/note.dart';
 import 'package:notex/notes/presentation/viewmodel/state/note_list_state.dart';
+import 'package:notex/di/app_providers.dart';
+import 'package:notex/core/services/gemini_service.dart';
 
 final notesListViewModelProvider = StateNotifierProvider<NotesListViewModel, NotesListState>(
   (ref) => NotesListViewModel(
     getNotesPaged: ref.read(getNotesPagedProvider),
     deleteNote: ref.read(deleteNoteProvider),
     createNote: ref.read(createNoteProvider),
+    gemini: ref.read(geminiServiceProvider),
   ),
 );
 
@@ -25,6 +28,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
     required this.getNotesPaged,
     required this.deleteNote,
     required this.createNote,
+    required this.gemini,
     bool autoload = true,
   }) : super(const NotesListState()) {
     if (autoload) {
@@ -34,6 +38,7 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
   final GetNotesPaged getNotesPaged;
   final DeleteNote deleteNote;
   final CreateNote createNote;
+  final GeminiService gemini;
 
   static const _pageSize = 100;
 
@@ -56,6 +61,13 @@ class NotesListViewModel extends StateNotifier<NotesListState> {
         ),
       );
     }
+    await refresh();
+  }
+
+  /// Uses Gemini to generate note content based on the [prompt].
+  Future<void> createFromPrompt(String prompt) async {
+    final text = await gemini.generateText(prompt);
+    await createNote(Note.create(title: prompt, content: text));
     await refresh();
   }
 
